@@ -13,7 +13,7 @@
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 2 100% 44%;
+    --primary: 0 100% 37%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 12%;
@@ -22,7 +22,7 @@
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 62%;
 
-    --accent: 2 100% 44%;
+    --accent: 0 100% 37%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 50%;
@@ -30,7 +30,7 @@
 
     --border: 0 0% 16%;
     --input: 0 0% 18%;
-    --ring: 2 100% 44%;
+    --ring: 0 100% 37%;
 
     --radius: 0rem;
   }
@@ -52,6 +52,29 @@
 
   ::selection {
     @apply bg-blood text-white;
+  }
+
+  /* Katana cursor. The follower element in `katana-cursor.tsx` sets
+     data-katana="on" once it is actually running, and only then do we hide the
+     native cursor — so touch, coarse pointers and reduced-motion keep theirs. */
+  html[data-katana="on"],
+  html[data-katana="on"] body,
+  html[data-katana="on"] a,
+  html[data-katana="on"] button,
+  html[data-katana="on"] [role="button"],
+  html[data-katana="on"] summary,
+  html[data-katana="on"] label,
+  html[data-katana="on"] select {
+    cursor: none;
+  }
+
+  /* Text fields keep a caret — losing it makes typing feel broken. */
+  html[data-katana="on"] input[type="text"],
+  html[data-katana="on"] input[type="email"],
+  html[data-katana="on"] input[type="password"],
+  html[data-katana="on"] input[type="search"],
+  html[data-katana="on"] textarea {
+    cursor: text;
   }
 
   /* Lenis smooth scroll wiring */
@@ -114,6 +137,16 @@
 
   .zenji-link-underline {
     @apply relative inline-block after:absolute after:bottom-[-3px] after:left-0 after:h-px after:w-0 after:bg-blood after:transition-[width] after:duration-300 hover:after:w-full;
+  }
+
+  /* Scroll distance the hero sequence plays over. Read by hero-stage.tsx. */
+  [data-hero-stage] {
+    --hero-scroll: 260vh;
+  }
+  @media (max-width: 767px) {
+    [data-hero-stage] {
+      --hero-scroll: 220vh;
+    }
   }
 
   .noise-overlay {

@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
+import { CountUp } from "@/components/motion/count-up";
 import { Reveal } from "@/components/motion/reveal";
 
 const STATS = [
@@ -54,7 +55,9 @@ export function Manifesto() {
         <div className="mt-16 grid gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {STATS.map((stat, index) => (
             <Reveal key={stat.label} delay={index * 0.07} className="bg-ink-950 p-8">
-              <p className="font-display text-5xl text-white">{stat.value}</p>
+              <p className="font-display text-5xl text-white">
+                <CountUp value={stat.value} />
+              </p>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-brand text-white/35">
                 {stat.label}
               </p>

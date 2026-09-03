@@ -9,6 +9,7 @@ import { Toaster } from "@/components/layout/toaster";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { PageTransition } from "@/components/motion/page-transition";
 import { ScrollProgress } from "@/components/motion/scroll-progress";
+import { KatanaCursor } from "@/components/katana-cursor";
 import { ReduxProvider } from "@/components/providers";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { QuickView } from "@/components/product/quick-view";
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PromoModal />
           <CookieBanner />
           <Toaster />
+          <KatanaCursor />
         </ReduxProvider>
       </body>
     </html>

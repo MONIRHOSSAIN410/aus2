@@ -2,13 +2,13 @@ export type ProductTag = "SALE" | "NEW_ARRIVAL" | "LIMITED";
 
 export interface Product {
   slug: string;
+  /** Cloudinary basename — see IMAGE_BASE and productImage(). */
+  image: string;
   name: string;
   sku: string;
   price: number;
   compareAt?: number;
   colorway: string;
-  /** Two-tone palette used by the generative artwork component. */
-  palette: { base: string; ink: string; accent: string; wash: string };
   kanji: string;
   kanjiMeaning: string;
   tags: ProductTag[];
@@ -29,12 +29,12 @@ export const NEXT_DROP_DATE = "2026-11-01T09:00:00+10:00";
 export const products: Product[] = [
   {
     slug: "blue-flame-tee",
+    image: "Blue-flame",
     name: "BLUE FLAME TEE",
     sku: "ZNJ-BLU-001",
     price: 33.99,
     compareAt: 39.99,
     colorway: "STEEL BLUE",
-    palette: { base: "#E8E6E1", ink: "#101418", accent: "#3E7CB1", wash: "#9FC3DE" },
     kanji: "焔",
     kanjiMeaning: "FLAME",
     tags: ["SALE"],
@@ -50,11 +50,11 @@ export const products: Product[] = [
   },
   {
     slug: "bushido-tee",
+    image: "Bushido",
     name: "BUSHIDO TEE",
     sku: "ZNJ-BSD-002",
     price: 39.99,
     colorway: "MIDNIGHT",
-    palette: { base: "#12100E", ink: "#F2EFE9", accent: "#C8102E", wash: "#2A2724" },
     kanji: "武",
     kanjiMeaning: "WARRIOR",
     tags: ["LIMITED"],
@@ -70,12 +70,12 @@ export const products: Product[] = [
   },
   {
     slug: "demon-blood-tee",
+    image: "Demon-blood",
     name: "DEMON BLOOD TEE",
     sku: "ZNJ-DMN-003",
     price: 33.99,
     compareAt: 39.99,
     colorway: "BONE / CRIMSON",
-    palette: { base: "#EFE9E4", ink: "#141414", accent: "#B3122B", wash: "#E7B9C4" },
     kanji: "鬼",
     kanjiMeaning: "DEMON",
     tags: ["SALE"],
@@ -91,11 +91,11 @@ export const products: Product[] = [
   },
   {
     slug: "domain-expansion-tee",
+    image: "Domain-expansion",
     name: "DOMAIN EXPANSION TEE",
     sku: "ZNJ-DOM-004",
     price: 39.99,
     colorway: "VOID BLACK",
-    palette: { base: "#0C0C0E", ink: "#EDEBE8", accent: "#6D4AC4", wash: "#241C3A" },
     kanji: "領",
     kanjiMeaning: "DOMAIN",
     tags: ["NEW_ARRIVAL"],
@@ -111,11 +111,11 @@ export const products: Product[] = [
   },
   {
     slug: "free-soul-tee",
+    image: "Free-soul",
     name: "FREE SOUL TEE",
     sku: "ZNJ-FRS-005",
     price: 39.99,
     colorway: "SEA SALT",
-    palette: { base: "#E4EAEA", ink: "#16211F", accent: "#0F8B7E", wash: "#A8D5CE" },
     kanji: "自",
     kanjiMeaning: "FREEDOM",
     tags: ["NEW_ARRIVAL"],
@@ -131,11 +131,11 @@ export const products: Product[] = [
   },
   {
     slug: "limitless-tee",
+    image: "Limitless",
     name: "LIMITLESS TEE",
     sku: "ZNJ-LIM-006",
     price: 39.99,
     colorway: "STATIC WHITE",
-    palette: { base: "#F4F4F5", ink: "#0B0B0D", accent: "#2E6BE6", wash: "#C2D3F5" },
     kanji: "無",
     kanjiMeaning: "INFINITY",
     tags: ["LIMITED"],
@@ -151,11 +151,11 @@ export const products: Product[] = [
   },
   {
     slug: "paradise-spirit-tee",
+    image: "Paradise-spirit",
     name: "PARADISE SPIRIT TEE",
     sku: "ZNJ-PDS-007",
     price: 39.99,
     colorway: "SAKURA ASH",
-    palette: { base: "#EDE4E4", ink: "#191316", accent: "#D4657F", wash: "#F0C2CE" },
     kanji: "楽",
     kanjiMeaning: "PARADISE",
     tags: ["NEW_ARRIVAL"],
@@ -171,12 +171,12 @@ export const products: Product[] = [
   },
   {
     slug: "warrior-spirit-tee",
+    image: "Warrior-spirit",
     name: "WARRIOR SPIRIT TEE",
     sku: "ZNJ-WRS-008",
     price: 33.99,
     compareAt: 39.99,
     colorway: "OBSIDIAN",
-    palette: { base: "#111113", ink: "#F1EEE9", accent: "#E10600", wash: "#2B1D1D" },
     kanji: "力",
     kanjiMeaning: "STRENGTH",
     tags: ["SALE"],
@@ -192,11 +192,11 @@ export const products: Product[] = [
   },
   {
     slug: "water-breathing-tee",
+    image: "Water-breathing",
     name: "WATER BREATHING TEE",
     sku: "ZNJ-WTR-009",
     price: 39.99,
     colorway: "DEEP CURRENT",
-    palette: { base: "#DFE7EC", ink: "#0F1A22", accent: "#1E6E9C", wash: "#8FB9D4" },
     kanji: "水",
     kanjiMeaning: "WATER",
     tags: ["LIMITED"],
@@ -212,12 +212,12 @@ export const products: Product[] = [
   },
   {
     slug: "will-of-the-sun-tee",
+    image: "Will-of-the-sun",
     name: "WILL OF THE SUN TEE",
     sku: "ZNJ-SUN-010",
     price: 33.99,
     compareAt: 39.99,
     colorway: "EMBER SAND",
-    palette: { base: "#F0E5D5", ink: "#1A130C", accent: "#E4761B", wash: "#F3C48A" },
     kanji: "陽",
     kanjiMeaning: "SUN",
     tags: ["SALE"],
@@ -244,6 +244,15 @@ export const featuredProducts = () =>
 
 export const saleProducts = () => products.filter((product) => product.tags.includes("SALE"));
 
+/**
+ * Order the SALE showcase deals its cards, matching the live site's sequence
+ * rather than the raw data order.
+ */
+export const showcaseProducts = () =>
+  ["warrior-spirit-tee", "blue-flame-tee", "demon-blood-tee", "will-of-the-sun-tee"]
+    .map((slug) => getProduct(slug))
+    .filter((product): product is Product => Boolean(product));
+
 export function relatedProducts(slug: string, count = 4) {
   const current = getProduct(slug);
   return products
@@ -256,13 +265,56 @@ export function relatedProducts(slug: string, count = 4) {
     .slice(0, count);
 }
 
+/* ------------------------------------------------------------------ */
+/*  Product photography                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Images are served from the ZENJI Cloudinary account, the same source the live
+ * site uses. Every product has five frames: 1 front, 2 back, 3 & 4 detail,
+ * 5 on model.
+ *
+ * To host the photography yourself instead, drop the files into
+ * `public/products/` and change IMAGE_BASE to "/products".
+ */
+export const IMAGE_BASE =
+  "https://res.cloudinary.com/diqbikizp/image/upload/f_auto,q_auto/zenji/products";
+
 export const lookbookViews = ["FRONT", "BACK", "ON MODEL"] as const;
 export type LookbookView = (typeof lookbookViews)[number];
+
+const VIEW_FRAME: Record<LookbookView, number> = {
+  FRONT: 1,
+  BACK: 2,
+  "ON MODEL": 5,
+};
+
+/** URL for one frame of a product, 1–5. */
+export function productImage(product: Product, frame = 1) {
+  return `${IMAGE_BASE}/${product.image}-${Math.min(5, Math.max(1, frame))}.webp`;
+}
+
+/** URL for a named view — what the cards, lookbook and cart use. */
+export function productView(product: Product, view: LookbookView = "FRONT") {
+  return productImage(product, VIEW_FRAME[view]);
+}
+
+/** All five frames, for the product-page gallery. */
+export function productGallery(product: Product) {
+  const labels = ["FRONT", "BACK", "DETAIL", "FABRIC", "ON MODEL"];
+  return [1, 2, 3, 4, 5].map((frame) => ({
+    frame,
+    label: labels[frame - 1],
+    src: productImage(product, frame),
+    alt: `${product.name} — ${labels[frame - 1].toLowerCase()}`,
+  }));
+}
 
 export interface LookbookShot {
   id: string;
   product: Product;
   view: LookbookView;
+  src: string;
 }
 
 export const lookbookShots: LookbookShot[] = products.flatMap((product) =>
@@ -270,5 +322,6 @@ export const lookbookShots: LookbookShot[] = products.flatMap((product) =>
     id: `${product.slug}-${view.toLowerCase().replace(/\s/g, "-")}`,
     product,
     view,
+    src: productView(product, view),
   })),
 );

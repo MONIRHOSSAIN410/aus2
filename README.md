@@ -27,10 +27,10 @@ Node 18.17+ required. No environment variables needed — it runs as-is.
 
 | Route | What's on it |
 | --- | --- |
-| `/` | Intro splash, parallax hero, about block, sale rail, full-bleed carousel, latest-drops rail, manifesto |
+| `/` | Intro splash, scroll-scrubbed hero sequence, about block, SALE scroll-stack, full-bleed carousel, latest-drops rail, manifesto |
 | `/login` | **Google / Apple / email sign-in**, guest link, animated provider→email transition |
 | `/drop` | Next-drop countdown, waitlist form, still-available grid |
-| `/drop/[slug]` | Product detail — gallery views, size picker, wishlist, accordions, related rail (10 static routes) |
+| `/drop/[slug]` | Product detail — five-frame gallery, size picker, wishlist, accordions, related rail (10 static routes) |
 | `/collection` | Filter by tag, live search, sort, animated masonry regrid |
 | `/lookbook` | Editorial masonry, 30 frames, filter by FRONT / BACK / ON MODEL |
 | `/our-story` | Brand narrative, fact grid, timeline |
@@ -103,7 +103,7 @@ src/
 ├── app/                     App Router — one folder per route
 │   ├── layout.tsx           providers, fonts, global chrome
 │   ├── globals.css          design tokens + component layer
-│   ├── icon.svg             favicon (力)
+│   ├── icon.png             favicon, built from the ZJ monogram
 │   ├── robots.ts sitemap.ts SEO metadata routes
 │   └── …                    page routes
 ├── components/
@@ -112,7 +112,7 @@ src/
 │   ├── motion/              Reveal, SplitHeading, Marquee, Magnetic, PageTransition, ScrollProgress
 │   ├── auth/                login card + provider marks
 │   ├── home/                hero, intro splash, about, carousel, manifesto
-│   ├── product/             card, rail, grid, detail, quick view, size selector, generative artwork
+│   ├── product/             card, rail, grid, detail, quick view, size selector, image wrapper
 │   ├── lookbook/ drop/ cart/ account/ contact/ shared/
 │   ├── providers.tsx        Redux Provider + localStorage bridge
 │   └── smooth-scroll.tsx    Lenis
@@ -121,6 +121,8 @@ src/
 │   └── slices/              auth · cart · wishlist · ui
 ├── lib/                     products, faq, site config, fonts, utils
 └── fonts/                   self-hosted woff2
+
+public/                      logos, favicon source, custom cursor
 ```
 
 ### Redux Toolkit
@@ -134,9 +136,14 @@ browsing doesn't break the app.
 
 | Effect | Where |
 | --- | --- |
+| Hero sequence | `home/hero-stage.tsx` — 150 stills scrubbed to a canvas by scroll position |
+| SALE scroll-stack | `home/drop-showcase.tsx` — cards pin, shrink and dim as the next rides over |
+| Katana cursor | `katana-cursor.tsx` — follower that scales on interactive elements |
 | Smooth scroll | Lenis in `smooth-scroll.tsx` — anchor interception, route reset, disabled under `prefers-reduced-motion` |
 | Scroll progress | `motion/scroll-progress.tsx`, spring-damped bar under the header |
-| Parallax | `useScroll` + `useTransform` on hero, about image, manifesto wordmark |
+| Parallax | `useScroll` + `useTransform` on the about image and manifesto wordmark; `lookbook/parallax-tile.tsx` per tile |
+| Counting stats | `motion/count-up.tsx` — numbers tick up on entry, non-numeric labels pass through |
+| Timeline | `motion/timeline.tsx` — rail draws itself, markers spring in |
 | Headline reveal | `SplitHeading` — per-line clip-and-rise |
 | Scroll entrance | `Reveal`, `StaggerGroup`/`StaggerItem` via `whileInView` |
 | Page transitions | `AnimatePresence mode="wait"` keyed on pathname |
@@ -162,16 +169,73 @@ Every animation checks `useReducedMotion()` or is neutralised by the reduced-mot
 
 ---
 
-## Product imagery
+## Imagery and brand assets
 
-There are no image files. `components/product/product-art.tsx` generates a deterministic SVG per
-product — tee silhouette, seeded ink splatter, halftone, kanji graphic — in three views
-(FRONT / BACK / ON MODEL), seeded from the slug so server and client render identically.
+### Product photography
 
-To swap in real photography, replace that one component with `next/image`. Everything else takes a
-`Product` object, not an image URL, so nothing else changes.
+Real ZENJI photography, served from the same Cloudinary account the live site uses. Every product
+has five frames:
 
-Product names, prices and copy follow the reference site; artwork is original placeholder geometry.
+| Frame | View |
+| --- | --- |
+| `-1` | Front |
+| `-2` | Back |
+| `-3`, `-4` | Detail |
+| `-5` | On model |
+
+`src/lib/products.ts` holds the base URL and the helpers:
+
+```ts
+productImage(product, 3)          // one frame
+productView(product, "ON MODEL")  // a named view
+productGallery(product)           // all five, for the PDP gallery
+```
+
+`components/product/product-image.tsx` wraps `next/image` around them, and
+`res.cloudinary.com` is allow-listed in `next.config.mjs`.
+
+**To host the photos yourself:** download the files into `public/products/` keeping the
+`Name-1.webp … Name-5.webp` naming, then change one line:
+
+```ts
+export const IMAGE_BASE = "/products";
+```
+
+### The hero sequence
+
+The homepage hero is a scroll-scrubbed frame sequence, the same technique the live
+site uses — a run of webp stills painted to a canvas, with the frame index tied to
+scroll position, so the shot plays as you scroll.
+
+`src/lib/hero-stage.ts` holds the config: 150 wide frames from the md breakpoint up,
+75 lighter ones on phones, and how far you scroll to play them through.
+
+It degrades in three steps, so the hero always shows something: reduced motion gets
+the poster still with no scrubbing; a slow connection gets the poster until frame 0
+decodes; a blocked frame source leaves the gradient ground.
+
+**To host the frames yourself:** copy the `hero-stage` folder into `public/` and set
+
+```ts
+BASE: "/hero-stage",
+```
+
+### Logos
+
+The supplied ZENJI wordmark and ZJ monogram live in `public/`, in white and black variants:
+
+- `zenji-wordmark.png` / `zenji-wordmark-dark.png`
+- `zenji-mark.png` / `zenji-mark-dark.png`
+- `src/app/icon.png` + `public/apple-icon.png` — favicon and touch icon, built from the monogram
+- `public/cursor-katana.png` — the katana cursor, driven by `katana-cursor.tsx`
+
+`components/layout/wordmark.tsx` renders them:
+
+```tsx
+<Wordmark height={26} />                    // header
+<Wordmark variant="mark" height={40} />     // monogram
+<Wordmark tone="dark" href={null} />        // on a light surface
+```
 
 ---
 
@@ -192,4 +256,5 @@ reduced-motion support.
 - The contact and waitlist forms resolve locally — point them at your endpoint
 - Legal pages are placeholders — replace before launch
 - Set `NEXT_PUBLIC_SITE_URL` so `sitemap.xml` emits real URLs
+- Product photography and the hero frames load from the live site — see **Imagery** and **The hero sequence** above to self-host them
 - Bump `NEXT_DROP_DATE` in `src/lib/products.ts` when the countdown expires

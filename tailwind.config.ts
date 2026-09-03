@@ -51,14 +51,16 @@ const config: Config = {
         },
         // ZENJI brand scale
         blood: {
-          DEFAULT: "#E10600",
+          DEFAULT: "#BC0100",
           50: "#FFE9E7",
-          400: "#FF3B30",
-          500: "#E10600",
-          600: "#B80500",
-          700: "#8A0400",
-          900: "#3D0201",
+          400: "#F0231F",
+          500: "#BC0100",
+          600: "#9C0100",
+          700: "#760100",
+          900: "#320100",
         },
+        // The white ground the SALE showcase sits on, matching the live site.
+        stark: "#FFFFFF",
         ink: {
           950: "#050505",
           900: "#0A0A0A",

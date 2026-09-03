@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Reveal } from "@/components/motion/reveal";
-import { ProductArt } from "@/components/product/product-art";
+import { Timeline } from "@/components/motion/timeline";
+import { ProductImage } from "@/components/product/product-image";
 import { PageHero } from "@/components/shared/page-hero";
 import { getProduct } from "@/lib/products";
 
@@ -40,7 +41,12 @@ export default function OurStoryPage() {
         <div className="container grid gap-14 lg:grid-cols-2 lg:gap-20">
           <Reveal direction="right">
             <div className="relative aspect-[4/5] overflow-hidden border border-white/10">
-              <ProductArt product={hero} view="ON MODEL" className="size-full" />
+              <ProductImage
+                product={hero}
+                view="ON MODEL"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="size-full"
+              />
             </div>
           </Reveal>
 
@@ -118,24 +124,14 @@ export default function OurStoryPage() {
             <h2 className="zenji-display mt-4 text-5xl text-white sm:text-6xl">THE CHAPTERS.</h2>
           </Reveal>
 
-          <ol className="mt-14 space-y-px border-l border-white/10 pl-8">
-            {TIMELINE.map((entry, index) => (
-              <Reveal key={entry.year} as="li" delay={index * 0.08} className="relative pb-12">
-                <span className="absolute -left-[41px] top-1.5 size-3 border-2 border-blood bg-ink-950" />
-                <p className="font-display text-4xl text-white/25">{entry.year}</p>
-                <p className="mt-2 font-mono text-[11px] uppercase tracking-brand text-white">
-                  {entry.title}
-                </p>
-                <p className="mt-2 max-w-md font-mono text-[13px] leading-relaxed text-white/45">
-                  {entry.body}
-                </p>
-              </Reveal>
-            ))}
-          </ol>
-
-          <p className="mt-6 font-mono text-[10px] uppercase tracking-brand text-white/25">
-            FOR THE DREAMERS. FIGHTERS. CREATORS. OUTSIDERS.
-          </p>
+          <Timeline
+            entries={TIMELINE}
+            footer={
+              <p className="mt-10 font-mono text-[10px] uppercase tracking-brand text-white/25">
+                FOR THE DREAMERS. FIGHTERS. CREATORS. OUTSIDERS.
+              </p>
+            }
+          />
         </div>
       </section>
     </>

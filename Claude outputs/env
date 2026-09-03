@@ -1,0 +1,8 @@
+# Address of the CookMe backend.
+#
+# Left unset on purpose: in development the browser calls /api and Vite's
+# proxy (vite.config.js) forwards it to the backend, which avoids CORS.
+# The deployed site already knows the backend address from src/api/axios.js.
+#
+# Set this only to point at a different backend:
+# VITE_API_URL="https://mvc-backend-b5wn.vercel.app/api"

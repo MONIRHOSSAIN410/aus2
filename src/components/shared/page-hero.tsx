@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/motion/count-up";
 import { Reveal, SplitHeading } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,9 @@ export function PageHero({
           <div className="mt-12 flex flex-wrap gap-x-12 gap-y-6">
             {meta.map((item, index) => (
               <Reveal key={item.label} delay={0.18 + index * 0.06}>
-                <p className="font-display text-3xl text-white">{item.value}</p>
+                <p className="font-display text-3xl text-white">
+                  <CountUp value={item.value} />
+                </p>
                 <p className="mt-1 font-mono text-[10px] uppercase tracking-brand text-white/30">
                   {item.label}
                 </p>

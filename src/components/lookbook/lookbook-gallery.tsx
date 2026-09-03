@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { ProductArt } from "@/components/product/product-art";
+import { ParallaxTile } from "@/components/lookbook/parallax-tile";
+import { ProductImage } from "@/components/product/product-image";
 import { Badge } from "@/components/ui/badge";
 import { lookbookShots, lookbookViews, type LookbookView } from "@/lib/products";
 import { cn } from "@/lib/utils";
@@ -61,13 +62,22 @@ export function LookbookGallery() {
                 transition={{ duration: 0.55, delay: (index % 6) * 0.05, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative break-inside-avoid overflow-hidden border border-white/10"
               >
-                <div className={cn("w-full", index % 5 === 0 ? "aspect-[3/4]" : "aspect-[4/5]")}>
-                  <ProductArt
+                <ParallaxTile
+                  depth={index % 3 === 1 ? -1 : 1}
+                  className={cn(
+                    "w-full overflow-hidden",
+                    index % 5 === 0 ? "aspect-[3/4]" : "aspect-[4/5]",
+                  )}
+                >
+                  <ProductImage
                     product={shot.product}
-                    view={shot.view}
-                    className="size-full transition-transform duration-700 group-hover:scale-105"
+                    src={shot.src}
+                    alt={`${shot.product.name} — ${shot.view.toLowerCase()}`}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="size-full"
+                    imgClassName="transition-transform duration-700 group-hover:scale-105"
                   />
-                </div>
+                </ParallaxTile>
 
                 <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink-950 via-ink-950/25 to-transparent p-5 opacity-0 transition-opacity duration-400 group-hover:opacity-100 group-focus-within:opacity-100">
                   {shot.product.compareAt && <Badge variant="sale" className="mb-3 w-fit">SALE</Badge>}

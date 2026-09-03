@@ -1,100 +1,10 @@
-"use client";
+/**
+ * Deprecated.
+ *
+ * The homepage hero is now `home/hero-stage.tsx` — a scroll-scrubbed frame
+ * sequence rather than a static backdrop.
+ *
+ * Nothing imports this module. It is safe to delete.
+ */
 
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { useRef } from "react";
-
-import { Magnetic } from "@/components/motion/magnetic";
-import { SplitHeading } from "@/components/motion/reveal";
-import { COLLECTION_NAME } from "@/lib/products";
-
-export function Hero() {
-  const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "26%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
-  const kanjiY = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "-38%"]);
-
-  return (
-    <section
-      ref={ref}
-      className="relative flex min-h-[92vh] items-center overflow-hidden border-b border-white/10"
-    >
-      {/* layered background */}
-      <motion.div style={{ y }} className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,#2a0d0d_0%,#0a0a0a_55%,#050505_100%)]" />
-        <div className="absolute inset-0 grid-lines opacity-60" />
-        <div className="noise-overlay absolute inset-0 opacity-[0.06] mix-blend-overlay" />
-        <motion.span
-          style={{ y: kanjiY }}
-          className="absolute -right-8 top-1/2 -translate-y-1/2 select-none font-display text-[46vw] leading-none text-white/[0.035] md:text-[34vw]"
-          aria-hidden
-        >
-          力
-        </motion.span>
-      </motion.div>
-
-      <motion.div style={{ opacity }} className="container relative py-28">
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.6 }}
-          className="zenji-eyebrow"
-        >
-          {COLLECTION_NAME} {"//"} LOADING...
-        </motion.p>
-
-        <h1 className="zenji-display mt-6 text-[19vw] text-white sm:text-[15vw] lg:text-[11rem]">
-          <SplitHeading text={"WEAR YOUR\nSTORY"} delay={0.2} />
-        </h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.75, duration: 0.7 }}
-          className="mt-8 max-w-lg font-mono text-sm leading-relaxed text-white/50"
-        >
-          Anime-inspired streetwear built for gamers and otaku. Japanese artwork, oversized
-          silhouettes, heavyweight cotton. Every drop limited — no restocks, ever.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.7 }}
-          className="mt-10 flex flex-wrap items-center gap-4"
-        >
-          <Magnetic>
-            <Link
-              href="/collection"
-              className="inline-flex items-center gap-3 bg-blood px-9 py-4 font-mono text-[11px] uppercase tracking-brand text-white transition-colors hover:bg-blood-600"
-            >
-              SHOP THE DROP <ArrowRight className="size-4" />
-            </Link>
-          </Magnetic>
-          <Link
-            href="/lookbook"
-            className="zenji-link-underline font-mono text-[11px] uppercase tracking-brand text-white/60 hover:text-white"
-          >
-            VIEW THE LOOKBOOK
-          </Link>
-        </motion.div>
-      </motion.div>
-
-      <motion.a
-        href="#about"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.3 }}
-        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 font-mono text-[9px] uppercase tracking-brand text-white/35 hover:text-white"
-      >
-        SCROLL
-        <motion.span animate={{ y: [0, 7, 0] }} transition={{ duration: 1.8, repeat: Infinity }}>
-          <ArrowDown className="size-4" />
-        </motion.span>
-      </motion.a>
-    </section>
-  );
-}
+export {};
