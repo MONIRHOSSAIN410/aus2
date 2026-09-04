@@ -2,11 +2,11 @@
   "name": "zenji-storefront",
   "version": "1.0.0",
   "private": true,
-  "description": "ZENJI — anime streetwear storefront. Next.js 14 App Router + Redux Toolkit + Tailwind CSS + shadcn/ui + Framer Motion + Lenis + Embla.",
+  "description": "ZENJI \u2014 anime streetwear storefront. Next.js 14 App Router + Redux Toolkit + Tailwind CSS + shadcn/ui + Framer Motion + Lenis + Embla.",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && next dev",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "next lint"
   },
   "dependencies": {
