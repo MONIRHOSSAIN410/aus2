@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { Magnetic } from "@/components/motion/magnetic";
 import { SplitHeading } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { heroStage, type HeroVariant } from "@/lib/hero-stage";
+import { frameIndices, heroStage, type HeroVariant } from "@/lib/hero-stage";
 import { COLLECTION_NAME } from "@/lib/products";
 
 /**
@@ -41,9 +41,11 @@ export function HeroStage() {
   // Copy fades and lifts away over the last stretch of the scrub.
   const copyOpacity = useTransform(scrollYProgress, [0, heroStage.handoff, 1], [1, 1, 0]);
   const copyY = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "-18%"]);
-  const veilOpacity = useTransform(scrollYProgress, [0, 1], [0.35, 0.85]);
+  const veilOpacity = useTransform(scrollYProgress, [0, 1], [0.18, 0.7]);
 
   const config = heroStage[variant];
+  const indices = frameIndices(variant);
+  const frameCount = indices.length;
 
   /* ---- pick the sequence that fits the viewport ---- */
   useEffect(() => {
@@ -64,37 +66,56 @@ export function HeroStage() {
     drawnRef.current = -1;
     setReady(false);
 
-    // Frame 0 first so the canvas can take over from the poster immediately,
-    // then the rest in order — later frames arrive before you scroll to them.
-    const load = (index: number) =>
+    const load = (slot: number) =>
       new Promise<void>((resolve) => {
         const img = new Image();
         img.decoding = "async";
         img.onload = () => {
-          images[index] = img;
+          images[slot] = img;
           resolve();
         };
         img.onerror = () => resolve();
-        img.src = heroStage.frame(config.dir, index);
+        img.src = heroStage.frame(config.dir, indices[slot]);
       });
 
-    (async () => {
+    // Frame 0 first so the canvas can take over from the poster, then the rest
+    // a few at a time. Capping concurrency keeps the sequence from monopolising
+    // the connection while the page is still fetching what it needs to render.
+    const run = async () => {
       await load(0);
       if (cancelled) return;
       setReady(true);
       requestDraw();
 
-      for (let i = 1; i < config.count; i += 1) {
-        if (cancelled) return;
-        await load(i);
-      }
-    })();
+      let next = 1;
+      const worker = async () => {
+        while (!cancelled && next < frameCount) {
+          const slot = next;
+          next += 1;
+          await load(slot);
+        }
+      };
+      await Promise.all(
+        Array.from({ length: heroStage.concurrency }, () => worker()),
+      );
+    };
+
+    // Wait for the browser to go idle so the hero never competes with first paint.
+    const idle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(() => void run(), { timeout: 1200 })
+        : window.setTimeout(() => void run(), 200);
 
     return () => {
       cancelled = true;
+      if (typeof window.cancelIdleCallback === "function" && typeof idle === "number") {
+        window.cancelIdleCallback(idle);
+      } else {
+        clearTimeout(idle as number);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.dir, config.count, reduce]);
+  }, [config.dir, frameCount, reduce]);
 
   /* ---- paint ---- */
   const requestDraw = () => {
@@ -109,10 +130,7 @@ export function HeroStage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const index = Math.min(
-      config.count - 1,
-      Math.max(0, Math.round(progress * (config.count - 1))),
-    );
+    const index = Math.min(frameCount - 1, Math.max(0, Math.round(progress * (frameCount - 1))));
 
     // Fall back to the nearest earlier frame that has decoded, so scrubbing
     // ahead of the preloader shows the last good frame instead of blanking.
@@ -135,17 +153,13 @@ export function HeroStage() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
 
-    // cover-fit the frame into the panel
-    const scale = Math.max(width / frame.naturalWidth, height / frame.naturalHeight);
+    // Fit by HEIGHT, not cover. The subject is framed head-to-toe in the source,
+    // so matching the panel height keeps the whole figure on screen at every
+    // viewport; the sides overflow and are cropped instead. Where that would
+    // leave bars (very wide panels) the gradient ground behind shows through.
+    const scale = height / frame.naturalHeight;
     const drawWidth = frame.naturalWidth * scale;
-    const drawHeight = frame.naturalHeight * scale;
-    ctx.drawImage(
-      frame,
-      (width - drawWidth) / 2,
-      (height - drawHeight) / 2,
-      drawWidth,
-      drawHeight,
-    );
+    ctx.drawImage(frame, (width - drawWidth) / 2, 0, drawWidth, height);
   };
 
   useEffect(() => {
@@ -175,7 +189,9 @@ export function HeroStage() {
         {/* ground under everything, so a blocked frame source still looks intentional */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_10%,#2a0d0d_0%,#0a0a0a_55%,#050505_100%)]" />
 
-        {/* poster — visible until frame 0 decodes, and the reduced-motion fallback */}
+        {/* poster — visible until frame 0 decodes, and the reduced-motion fallback.
+            Sized by height with the width left to overflow, so it frames the
+            figure exactly the way the canvas does and there is no jump on swap. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={heroStage.poster(config.dir)}
@@ -183,7 +199,7 @@ export function HeroStage() {
           aria-hidden
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 size-full object-cover transition-opacity duration-500"
+          className="absolute left-1/2 top-0 h-full w-auto max-w-none -translate-x-1/2 transition-opacity duration-500"
           style={{ opacity: ready && !reduce ? 0 : 1 }}
           onError={(event) => {
             event.currentTarget.style.display = "none";
@@ -196,9 +212,9 @@ export function HeroStage() {
         <motion.div
           aria-hidden
           style={{ opacity: veilOpacity }}
-          className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/55 to-ink-950/25"
+          className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/40 to-transparent"
         />
-        <div aria-hidden className="absolute inset-0 grid-lines opacity-40" />
+        <div aria-hidden className="absolute inset-0 grid-lines opacity-25" />
         <div aria-hidden className="noise-overlay absolute inset-0 opacity-[0.06] mix-blend-overlay" />
 
         {/* copy */}

@@ -278,7 +278,7 @@ export function relatedProducts(slug: string, count = 4) {
  * `public/products/` and change IMAGE_BASE to "/products".
  */
 export const IMAGE_BASE =
-  "https://res.cloudinary.com/diqbikizp/image/upload/f_auto,q_auto/zenji/products";
+  "https://res.cloudinary.com/diqbikizp/image/upload/zenji/products";
 
 export const lookbookViews = ["FRONT", "BACK", "ON MODEL"] as const;
 export type LookbookView = (typeof lookbookViews)[number];
