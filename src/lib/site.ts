@@ -68,6 +68,26 @@ export const footerColumns = [
   },
 ];
 
+/**
+ * First-order popup.
+ *
+ * Session-scoped rather than permanent: it greets every fresh visit but stops
+ * nagging within one. `delayMs` is measured from load and sits just after the
+ * intro splash clears, so the two never overlap.
+ */
+export const promo = {
+  delayMs: 2200,
+  /** "session" shows once per visit; "forever" shows once per browser. */
+  scope: "session" as "session" | "forever",
+  storageKey: "zenji.promo.v2",
+  /**
+   * Routes the offer stays out of the way on. Interrupting someone who is
+   * signing in or checking out costs more than the offer is worth — and a modal
+   * over those pages hides the form behind it from screen readers too.
+   */
+  mutedPaths: ["/login", "/account", "/cart"],
+};
+
 export const fighterOptions = [
   "JUJUTSU KAISEN",
   "DEMON SLAYER",

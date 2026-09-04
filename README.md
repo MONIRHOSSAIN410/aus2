@@ -21,6 +21,14 @@ npm run lint                 # eslint
 
 Node 18.17+ required. No environment variables needed — it runs as-is.
 
+### Deploying to Vercel
+
+Import the repo and deploy; the defaults are correct (Next.js preset, `npm run build`).
+`package-lock.json` is committed so Vercel installs the exact tree this was built and
+tested against rather than re-resolving on each deploy.
+
+Optionally set `NEXT_PUBLIC_SITE_URL` to your domain so `sitemap.xml` emits real URLs.
+
 ---
 
 ## Pages
@@ -42,7 +50,22 @@ Node 18.17+ required. No environment variables needed — it runs as-is.
 | `404` | Themed not-found |
 
 Plus global chrome: marquee announcement bar, sticky header with mega-menu, mobile drawer nav,
-slide-out cart, quick-view dialog, promo modal, cookie banner, toast system, scroll-progress bar.
+slide-out cart, quick-view dialog, first-order popup, cookie banner, toast system, scroll-progress bar.
+
+### The first-order popup
+
+`FREE SHIPPING ON FIRST ORDER` opens a couple of seconds into a visit, just after the
+intro splash clears. Tune it in one place, `promo` in `src/lib/site.ts`:
+
+```ts
+delayMs: 2200,          // when it opens
+scope: "session",       // once per visit; "forever" for once per browser
+mutedPaths: ["/login", "/account", "/cart"],
+```
+
+It stays off the sign-in, account and cart routes — interrupting someone mid-checkout
+costs more than the offer is worth, and a modal there hides the form behind it from
+screen readers.
 
 ---
 
@@ -161,6 +184,24 @@ Every animation checks `useReducedMotion()` or is neutralised by the reduced-mot
   support, progress-bar pagination
 - `product/product-rail.tsx` — draggable free-scroll product rail with edge-aware arrows
 
+### Performance
+
+The page is built so nothing expensive blocks first paint:
+
+| Lever | Effect |
+| --- | --- |
+| Cloudinary loader (`src/lib/image-loader.ts`) | `next/image` resizes on the CDN, not on this server. Zero `/_next/image` requests, no local re-encoding, no image cache to warm. |
+| Hero frame sampling (`stride` in `lib/hero-stage.ts`) | 50 stills instead of 150 — about a third of the bytes, still smooth under a scrub. |
+| Idle + capped preloading | The sequence starts on `requestIdleCallback` and fetches 4 at a time, so it never competes with first paint. |
+| Shared scroll pool (`lookbook/parallax-tile.tsx`) | One scroll listener and one rAF loop for all 30 tiles, with off-screen tiles parked by an IntersectionObserver. |
+| `optimizePackageImports` | Icon and motion imports are rewritten to deep paths so a single icon doesn't pull in the set. |
+
+Measured on the homepage: first contentful paint ~0.55s, no optimizer round-trips,
+52 hero frames fetched in the background rather than 150 up front.
+
+If it still feels slow, check you are not judging it from `npm run dev` — the dev
+server compiles routes on demand. `npm run build && npm start` is representative.
+
 ### Tailwind + shadcn/ui
 
 `components.json` is configured, so `npx shadcn@latest add <component>` drops new primitives into
@@ -209,6 +250,9 @@ scroll position, so the shot plays as you scroll.
 
 `src/lib/hero-stage.ts` holds the config: 150 wide frames from the md breakpoint up,
 75 lighter ones on phones, and how far you scroll to play them through.
+
+Frames are fitted by **height**, not cover, so the subject stays in shot head-to-toe at
+every viewport — the sides overflow instead of the figure being cropped.
 
 It degrades in three steps, so the hero always shows something: reduced motion gets
 the poster still with no scrubbing; a slow connection gets the poster until frame 0

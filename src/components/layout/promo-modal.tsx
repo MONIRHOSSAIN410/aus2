@@ -1,45 +1,49 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Wordmark } from "@/components/layout/wordmark";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { fighterOptions } from "@/lib/site";
+import { fighterOptions, promo } from "@/lib/site";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { dismissPromo, pushToast } from "@/store/slices/uiSlice";
 
-const KEY = "zenji.promo.v1";
-
 export function PromoModal() {
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
+  const muted = promo.mutedPaths.some((path) => pathname.startsWith(path));
   const dismissed = useAppSelector((state) => state.ui.promoDismissed);
   const [open, setOpen] = useState(false);
   const [fighter, setFighter] = useState<string | null>(null);
   const [email, setEmail] = useState("");
 
   useEffect(() => {
+    if (muted) return;
+    const store = promo.scope === "session" ? window.sessionStorage : window.localStorage;
     try {
-      if (localStorage.getItem(KEY)) return;
+      if (store.getItem(promo.storageKey)) return;
     } catch {
       /* storage blocked — still show once */
     }
-    const timer = setTimeout(() => setOpen(true), 4500);
+    const timer = setTimeout(() => setOpen(true), promo.delayMs);
     return () => clearTimeout(timer);
-  }, []);
+  }, [muted]);
 
   const close = () => {
     setOpen(false);
     dispatch(dismissPromo());
     try {
-      localStorage.setItem(KEY, "1");
+      const store = promo.scope === "session" ? window.sessionStorage : window.localStorage;
+      store.setItem(promo.storageKey, "1");
     } catch {
       /* ignore */
     }
   };
 
-  if (dismissed) return null;
+  if (dismissed || muted) return null;
 
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>

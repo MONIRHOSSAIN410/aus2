@@ -77,11 +77,14 @@
     cursor: text;
   }
 
-  /* Lenis smooth scroll wiring */
+  /* Lenis smooth scroll wiring.
+     Targets `html.lenis` rather than the `lenis-smooth` variant, because which
+     of those classes Lenis stamps has moved between versions. */
   html.lenis,
   html.lenis body {
     height: auto;
   }
+  html.lenis,
   .lenis.lenis-smooth {
     scroll-behavior: auto !important;
   }
